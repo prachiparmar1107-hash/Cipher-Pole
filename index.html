@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Project Cipher — Mastermind</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<!-- ===================================================
+     WELCOME / LANDING PAGE  (hidden after "Let's Play")
+     =================================================== -->
+<div class="welcome-screen" id="welcomeScreen">
+
+  <!-- Animated background particles -->
+  <canvas id="welcomeCanvas"></canvas>
+
+  <div class="welcome-content">
+    <div class="welcome-badge">Deduction Puzzle</div>
+    <h1 class="welcome-title">
+      PROJECT<br><span>CIPHER</span>
+    </h1>
+    <p class="welcome-sub">Mastermind Deduction Puzzle</p>
+
+    <div class="welcome-dots">
+      <span style="background:#FF4D6D"></span>
+      <span style="background:#FF9500"></span>
+      <span style="background:#FFE600"></span>
+      <span style="background:#00C97C"></span>
+      <span style="background:#3BBAFF"></span>
+      <span style="background:#CC5CE8"></span>
+    </div>
+
+    <button class="play-btn" id="playBtn">
+      <span class="play-btn-text">Let's Play</span>
+      <span class="play-btn-arrow">→</span>
+    </button>
+
+    <p class="welcome-hint">Crack the secret colour code before time runs out</p>
+  </div>
+</div>
+
+
+<!-- ===================================================
+     MAIN GAME  (shown after landing page)
+     =================================================== -->
+<div class="app game-screen hidden" id="gameScreen">
+
+  <!-- ===== HEADER ===== -->
+  <header>
+    <div class="logo">
+      PROJECT CIPHER
+      <span>Mastermind Deduction Puzzle</span>
+    </div>
+
+    <div class="controls">
+      <div class="ctrl-group">
+        Difficulty
+        <select id="difficulty">
+          <option value="easy">Easy — 4 slots, 4 colors, 8 guesses</option>
+          <option value="medium" selected>Medium — 5 slots, 6 colors, 10 guesses</option>
+          <option value="hard">Hard — 6 slots, 8 colors, 12 guesses</option>
+        </select>
+      </div>
+
+      <div class="ctrl-group">
+        Time Limit
+        <select id="timeLimit">
+          <option value="60">60 sec</option>
+          <option value="90" selected>90 sec</option>
+          <option value="120">120 sec</option>
+        </select>
+      </div>
+
+      <div class="ctrl-group">
+        Input Mode
+        <select id="inputMode">
+          <option value="click">Click to cycle</option>
+          <option value="palette">Click palette</option>
+          <option value="dropdown">Dropdown</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary" id="startBtn">▶ Start Game</button>
+
+      <!-- Dark Mode Toggle -->
+      <label class="theme-toggle" id="themeToggle" title="Toggle dark mode">
+        <div class="toggle-track">
+          <div class="toggle-thumb"></div>
+        </div>
+        <span class="toggle-label">🌙</span>
+      </label>
+    </div>
+  </header>
+
+  <!-- ===== MAIN GAME AREA ===== -->
+  <main class="game-area">
+
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
+
+      <!-- Color Palette -->
+      <div class="card">
+        <div class="card-title">Color Palette</div>
+        <div class="palette" id="palette"></div>
+      </div>
+
+      <!-- Current Guess Slots -->
+      <div class="card current-guess-wrap">
+        <div class="card-title">Your Guess</div>
+        <div class="current-guess" id="currentGuess"></div>
+        <div class="actions">
+          <button class="btn btn-primary"   id="submitGuess" disabled>Submit ↵</button>
+          <button class="btn btn-secondary" id="clearGuess"  disabled>Clear ✕</button>
+          <button class="hint-btn"          id="hintBtn"     disabled title="Reveals 1 correct position (-50 pts)">💡 Hint</button>
+        </div>
+      </div>
+
+      <!-- Countdown Timer -->
+      <div class="card timer-wrap">
+        <div class="card-title" style="text-align:center;">Time Remaining</div>
+        <svg id="timerSvg" viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="timerGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%"   stop-color="#5b5ef4" id="gradStop1"/>
+              <stop offset="100%" stop-color="#8b5cf6" id="gradStop2"/>
+            </linearGradient>
+          </defs>
+          <circle class="timer-bg" cx="50" cy="50" r="45"/>
+          <circle class="timer-fg" cx="50" cy="50" r="45" id="timerArc" stroke="url(#timerGrad)"/>
+          <text id="timerText" x="50" y="54" text-anchor="middle">00:00</text>
+        </svg>
+      </div>
+
+      <!-- Secret Code Reveal -->
+      <div class="card">
+        <div class="card-title">Secret Code</div>
+        <div class="secret-reveal">
+          <div class="secret-slot-wrap" id="secretSlots"></div>
+        </div>
+      </div>
+
+      <!-- Accessibility Symbol Overlay -->
+      <div class="card a11y-card">
+        <input type="checkbox" id="a11yMode"/>
+        <label for="a11yMode">♿ Symbol Overlay (A11y)</label>
+      </div>
+
+    </div><!-- /left-col -->
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+
+      <!-- Guess Board -->
+      <div class="card">
+        <div class="card-title" id="boardTitle">Game Board</div>
+        <div class="board" id="board">
+          <div class="board-placeholder">Press <strong>▶ Start Game</strong> to begin!</div>
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="card">
+        <div class="card-title">🏆 Leaderboard — Top 10</div>
+        <div class="lb-tabs" id="lbTabs">
+          <button class="btn btn-primary"   id="lbTabEasy"   onclick="showLbTab('easy')">Easy</button>
+          <button class="btn btn-secondary" id="lbTabMedium" onclick="showLbTab('medium')">Medium</button>
+          <button class="btn btn-secondary" id="lbTabHard"   onclick="showLbTab('hard')">Hard</button>
+        </div>
+        <ol class="lb-list" id="lbList"></ol>
+      </div>
+
+    </div><!-- /right-col -->
+
+  </main>
+
+  <footer>Project Cipher — Mastermind-style puzzle engine &nbsp;|&nbsp; No libraries, pure JS</footer>
+</div><!-- /app -->
+
+
+<!-- ===== WIN / LOSE MODAL ===== -->
+<div class="overlay hidden" id="overlay">
+  <div class="modal">
+    <div id="modalBody"></div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<!-- ===== WIN CELEBRATION CANVAS (fireworks) ===== -->
+<canvas id="fireworksCanvas"></canvas>
+
+<script src="app.js"></script>
+<script src="landing.js"></script>
+</body>
+</html>

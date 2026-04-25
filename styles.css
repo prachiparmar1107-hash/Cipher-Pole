@@ -1,0 +1,962 @@
+/* ============================================================
+   PROJECT CIPHER — styles.css
+   All visual styling for the Mastermind puzzle game.
+   Uses CSS custom properties (variables) for theming so that
+   dark mode works by simply switching [data-theme] on <html>.
+   ============================================================ */
+
+/* ===== 1. DESIGN TOKENS (CSS Variables) ===== */
+:root {
+  --bg:         #f0f2f8;
+  --surface:    #ffffff;
+  --surface2:   #f7f8fc;
+  --border:     #e2e6f0;
+  --text:       #1a1d2e;
+  --muted:      #6b7280;
+  --accent:     #5b5ef4;
+  --accent2:    #8b5cf6;
+  --red:        #ef4444;
+  --green:      #22c55e;
+  --slot-size:  44px;
+  --radius:     10px;
+  --shadow:     0 4px 24px rgba(0,0,0,0.08);
+  --transition: 0.2s ease;
+}
+
+/* Dark mode: overrides tokens when html has data-theme="dark" */
+[data-theme="dark"] {
+  --bg:       #0e1018;
+  --surface:  #161926;
+  --surface2: #1c2135;
+  --border:   #2a3050;
+  --text:     #e8eaf6;
+  --muted:    #7b84a8;
+  --accent:   #6c6ff5;
+  --accent2:  #9b72fa;
+}
+
+
+/* ===== 2. RESET & BASE ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html, body { height: 100%; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+}
+
+
+/* ===== 3. LAYOUT ===== */
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+.game-area {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+}
+.left-col  { display: flex; flex-direction: column; gap: 12px; }
+.right-col { display: flex; flex-direction: column; gap: 12px; }
+
+/* Stack columns on small screens */
+@media (max-width: 780px) {
+  .game-area { grid-template-columns: 1fr; }
+}
+
+
+/* ===== 4. HEADER ===== */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Game logo with gradient text */
+.logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 2px;
+}
+.logo span {
+  font-size: 0.75rem;
+  display: block;
+  color: var(--muted);
+  -webkit-text-fill-color: var(--muted);
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Label + select stacked vertically */
+.ctrl-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ctrl-group select {
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+.ctrl-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+
+/* ===== 5. BUTTONS ===== */
+.btn {
+  padding: 9px 18px;
+  border-radius: var(--radius);
+  border: none;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  box-shadow: 0 2px 10px rgba(91,94,244,0.3);
+}
+.btn-primary:hover  { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(91,94,244,0.4); }
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: var(--border); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+/* Hint button — outlined style */
+.hint-btn {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  border: 1px dashed var(--accent);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  transition: all var(--transition);
+}
+.hint-btn:hover   { background: var(--accent); color: white; }
+.hint-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+
+/* ===== 6. DARK MODE TOGGLE ===== */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.toggle-track {
+  width: 44px;
+  height: 24px;
+  background: var(--border);
+  border-radius: 12px;
+  position: relative;
+  transition: background var(--transition);
+  cursor: pointer;
+}
+[data-theme="dark"] .toggle-track { background: var(--accent); }
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  transition: transform var(--transition);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+[data-theme="dark"] .toggle-thumb { transform: translateX(20px); }
+.toggle-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 600;
+  user-select: none;
+}
+
+
+/* ===== 7. CARD ===== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  transition: background var(--transition), border-color var(--transition);
+}
+.card-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+
+/* ===== 8. COLOR PALETTE ===== */
+.palette {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.color-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 2.5px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
+  position: relative;
+}
+.color-swatch:hover   { transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.color-swatch.hidden  { opacity: 0; pointer-events: none; }
+.color-swatch.selected { border-color: white; box-shadow: 0 0 0 2px var(--accent); }
+
+
+/* ===== 9. CURRENT GUESS SLOTS ===== */
+.current-guess {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: var(--slot-size);
+}
+
+/* Individual slot in the active guess row */
+.slot {
+  width: var(--slot-size);
+  height: var(--slot-size);
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 2px dashed var(--border);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.slot:hover { border-color: var(--accent); }
+.slot.filled {
+  border-style: solid;
+  border-color: rgba(255,255,255,0.3);
+}
+
+/* Red ✕ badge shown on hover over a filled slot */
+.slot .slot-x {
+  display: none;
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  font-size: 9px;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 5;
+}
+.slot.filled:hover .slot-x { display: flex; }
+
+/* Dropdown color picker that appears below a slot */
+.dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+  z-index: 50;
+  box-shadow: var(--shadow);
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 120px;
+}
+.slot.dropdown-open .dropdown { display: flex; }
+
+/* Action buttons row under the guess slots */
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+
+/* ===== 10. TIMER ===== */
+.timer-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+#timerSvg { width: 110px; height: 110px; }
+
+/* Background ring (grey track) */
+.timer-bg {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 7;
+}
+
+/* Foreground arc — animates stroke-dashoffset to show remaining time */
+.timer-fg {
+  fill: none;
+  stroke-width: 7;
+  stroke-linecap: round;
+  transform-origin: 50% 50%;
+  transform: rotate(-90deg);     /* Start arc at top (12 o'clock) */
+  stroke-dasharray: 283;         /* Full circumference: 2 × π × 45 ≈ 282.74 */
+  stroke-dashoffset: 0;          /* 0 = full circle visible */
+  transition: stroke-dashoffset 0.9s linear, stroke 0.5s;
+}
+
+/* Timer digit text inside the SVG */
+#timerText {
+  font-family: 'Orbitron', monospace;
+  font-size: 16px;
+  fill: var(--text);
+  font-weight: 600;
+}
+
+
+/* ===== 11. GAME BOARD ===== */
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.board-placeholder {
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 20px 0;
+  text-align: center;
+}
+
+/* One row on the board (row number + guess dots + peg feedback) */
+.board-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s;
+}
+/* Highlight the row the player is currently filling */
+.board-row.active-row {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(91,94,244,0.15);
+}
+
+.row-num {
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-weight: 700;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.guess-slots { display: flex; gap: 6px; }
+
+/* One colour dot in a completed guess row */
+.guess-dot {
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  background: var(--border);
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+
+/* Peg feedback area — pushed to the right of the row */
+.feedback {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-left: auto;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Individual peg (starts invisible; .enter triggers the animation) */
+.peg {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  transform: scale(0);
+  opacity: 0;
+}
+.peg.black { background: #1a1d2e; }
+[data-theme="dark"] .peg.black { background: #ffffff; }
+.peg.white { background: #f0f0f0; border: 1.5px solid #aaa; }
+
+/* Staggered pop-in animation for pegs */
+.peg.enter {
+  animation: pegPop 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
+}
+@keyframes pegPop {
+  0%   { transform: scale(0);    opacity: 0; }
+  60%  { transform: scale(1.2);  opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+
+/* ===== 12. SECRET CODE REVEAL ===== */
+.secret-reveal { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.secret-slot-wrap { display: flex; gap: 7px; }
+.secret-slot {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  transition: background 0.3s;
+}
+
+
+/* ===== 13. LEADERBOARD ===== */
+.lb-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.lb-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.lb-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--surface2);
+}
+.lb-rank        { font-weight: 800; color: var(--muted); font-size: 0.75rem; width: 18px; }
+.lb-rank.gold   { color: #f59e0b; }
+.lb-rank.silver { color: #94a3b8; }
+.lb-rank.bronze { color: #c4762a; }
+.lb-score { margin-left: auto; font-weight: 700; color: var(--accent); }
+.lb-diff  {
+  font-size: 0.68rem;
+  color: var(--muted);
+  background: var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+
+/* ===== 14. MODAL OVERLAY ===== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  backdrop-filter: blur(4px);
+}
+.overlay.hidden { display: none; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  min-width: 300px;
+  max-width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: modalIn 0.3s cubic-bezier(0.2,0.9,0.3,1.1);
+}
+@keyframes modalIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+.modal h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+}
+.modal p { color: var(--muted); margin-bottom: 8px; }
+
+/* Big score number inside the modal */
+.modal-score {
+  font-size: 2rem;
+  font-family: 'Orbitron', monospace;
+  color: var(--accent);
+  font-weight: 800;
+  margin: 10px 0;
+}
+
+/* Name entry input in the win modal */
+.modal input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+.modal input:focus { outline: none; border-color: var(--accent); }
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+
+/* ===== 15. CONFETTI ===== */
+.confetti-piece {
+  position: fixed;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0;
+  z-index: 9999;
+  pointer-events: none;
+  animation: confettiFall 1.8s ease-out forwards;
+}
+@keyframes confettiFall {
+  0%   { opacity: 1; transform: translateY(0)     rotate(0deg)   scale(1);   }
+  80%  { opacity: 1;                                                           }
+  100% { opacity: 0; transform: translateY(320px)  rotate(720deg) scale(0.5); }
+}
+
+
+/* ===== 16. TOAST NOTIFICATION ===== */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--text);
+  color: var(--bg);
+  padding: 9px 18px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 1000;
+  opacity: 0;
+  animation: toastIn 0.3s ease forwards, toastOut 0.3s ease 1.8s forwards;
+}
+@keyframes toastIn  { to { opacity: 1; transform: translateX(-50%) translateY(0);   } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(-50%) translateY(10px); } }
+
+
+/* ===== 17. ACCESSIBILITY CARD ===== */
+.a11y-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.a11y-card input { cursor: pointer; width: 16px; height: 16px; }
+.a11y-card label {
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Symbols inside slots / dots */
+.slot-symbol, .dot-symbol {
+  font-size: 11px;
+  pointer-events: none;
+}
+
+
+/* ===== 18. FOOTER ===== */
+footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin-top: 24px;
+}
+
+
+/* ============================================================
+   PROJECT CIPHER — UPGRADE ADDITIONS
+   All new styles are appended here so original styles.css
+   is completely untouched above this block.
+   ============================================================ */
+
+
+/* ─────────────────────────────────────────────────────────
+   A. WELCOME / LANDING PAGE
+   ───────────────────────────────────────────────────────── */
+
+.welcome-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 30% 40%, #1a0533 0%, #0a0f1e 55%, #050810 100%);
+  z-index: 9000;
+  overflow: hidden;
+}
+
+/* Animated canvas behind the welcome content */
+#welcomeCanvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.welcome-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 20px;
+  animation: wcFadeUp 0.9s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+@keyframes wcFadeUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* "Deduction Puzzle" badge above the title */
+.welcome-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #8b5cf6;
+  border: 1px solid rgba(139,92,246,0.4);
+  border-radius: 20px;
+  padding: 5px 16px;
+  margin-bottom: 18px;
+  animation: wcFadeUp 0.9s 0.1s cubic-bezier(0.2,0.9,0.3,1) both;
+}
+
+/* Main title */
+.welcome-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(2.6rem, 9vw, 5.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: 4px;
+  color: white;
+  margin-bottom: 16px;
+  animation: wcFadeUp 0.9s 0.18s cubic-bezier(0.2,0.9,0.3,1) both;
+}
+
+.welcome-title span {
+  background: linear-gradient(135deg, #5b5ef4 0%, #8b5cf6 50%, #FF4D6D 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Subtitle */
+.welcome-sub {
+  font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  animation: wcFadeUp 0.9s 0.26s cubic-bezier(0.2,0.9,0.3,1) both;
+}
+
+/* Decorative colour dots row */
+.welcome-dots {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 36px;
+  animation: wcFadeUp 0.9s 0.34s cubic-bezier(0.2,0.9,0.3,1) both;
+}
+.welcome-dots span {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: block;
+  animation: dotPulse 2.4s ease-in-out infinite;
+}
+.welcome-dots span:nth-child(1) { animation-delay: 0.0s; }
+.welcome-dots span:nth-child(2) { animation-delay: 0.2s; }
+.welcome-dots span:nth-child(3) { animation-delay: 0.4s; }
+.welcome-dots span:nth-child(4) { animation-delay: 0.6s; }
+.welcome-dots span:nth-child(5) { animation-delay: 0.8s; }
+.welcome-dots span:nth-child(6) { animation-delay: 1.0s; }
+
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1);   opacity: 0.75; }
+  50%       { transform: scale(1.3); opacity: 1;    }
+}
+
+/* "Let's Play" button */
+.play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 40px;
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: white;
+  background: linear-gradient(135deg, #5b5ef4, #8b5cf6);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 0 30px rgba(91,94,244,0.45), 0 4px 20px rgba(0,0,0,0.3);
+  transition: transform 0.25s cubic-bezier(0.2,0.9,0.3,1.3),
+              box-shadow 0.25s ease,
+              background 0.2s;
+  position: relative;
+  overflow: hidden;
+  animation: wcFadeUp 0.9s 0.44s cubic-bezier(0.2,0.9,0.3,1) both;
+}
+
+/* Shimmer sweep on the button */
+.play-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+.play-btn:hover::before {
+  transform: translateX(100%);
+}
+
+.play-btn:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 0 50px rgba(91,94,244,0.6), 0 8px 30px rgba(0,0,0,0.35);
+}
+.play-btn:active {
+  transform: translateY(-1px) scale(1.01);
+}
+
+.play-btn-arrow {
+  font-size: 1.2rem;
+  transition: transform 0.2s ease;
+}
+.play-btn:hover .play-btn-arrow {
+  transform: translateX(4px);
+}
+
+/* Small hint text below the button */
+.welcome-hint {
+  margin-top: 20px;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.5px;
+  animation: wcFadeUp 0.9s 0.52s cubic-bezier(0.2,0.9,0.3,1) both;
+}
+
+
+/* ─────────────────────────────────────────────────────────
+   B. PAGE TRANSITION  (welcome → game)
+   ───────────────────────────────────────────────────────── */
+
+/* Fade the welcome screen out */
+.welcome-screen.fade-out {
+  animation: screenFadeOut 0.55s ease forwards;
+}
+@keyframes screenFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; transform: scale(0.97); }
+}
+
+/* Game screen starts hidden, then fades in */
+.game-screen {
+  opacity: 0;
+}
+.game-screen.fade-in {
+  animation: screenFadeIn 0.55s ease forwards;
+}
+@keyframes screenFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* Utility: truly hide an element (display:none) */
+.hidden {
+  display: none !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────
+   C. FIREWORKS CANVAS
+   ───────────────────────────────────────────────────────── */
+
+#fireworksCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8999;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+
+/* ─────────────────────────────────────────────────────────
+   D. MOBILE RESPONSIVENESS
+   ───────────────────────────────────────────────────────── */
+
+/* Ensure slots and swatches are touch-friendly on small screens */
+@media (max-width: 600px) {
+
+  /* Header stacks vertically */
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  /* Controls row wraps tightly */
+  .controls {
+    width: 100%;
+    gap: 8px;
+  }
+
+  /* Each select group takes full width on very small screens */
+  .ctrl-group {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 130px;
+  }
+
+  .ctrl-group select {
+    width: 100%;
+    font-size: 0.8rem;
+  }
+
+  /* Start button and theme toggle full-row */
+  #startBtn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  /* Bigger slots for touch */
+  :root { --slot-size: 48px; }
+
+  /* Wrap guess slots onto next line if needed */
+  .current-guess {
+    gap: 6px;
+  }
+
+  /* Action buttons stack on narrow */
+  .actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .actions .btn,
+  .actions .hint-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 0.95rem;
+    text-align: center;
+  }
+
+  /* Palette swatches slightly larger */
+  .color-swatch {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* Board rows compact */
+  .board-row {
+    gap: 6px;
+    padding: 8px;
+  }
+  .guess-dot {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Modal full-width on mobile */
+  .modal {
+    min-width: unset;
+    width: calc(100vw - 32px);
+    padding: 20px 16px;
+  }
+
+  /* Leaderboard tab buttons */
+  .lb-tabs { gap: 6px; }
+  .lb-tabs .btn {
+    flex: 1;
+    padding: 8px 6px;
+    font-size: 0.8rem;
+  }
+
+  /* Footer smaller */
+  footer { font-size: 0.7rem; }
+}
+
+/* Medium tablet breakpoint: 601–780px — already handled by the
+   existing @media (max-width:780px) rule in styles.css        */
+
+@media (max-width: 780px) {
+  /* Timer SVG a bit smaller to save space */
+  #timerSvg { width: 90px; height: 90px; }
+
+  /* Secret slots wrap nicely */
+  .secret-slot-wrap { flex-wrap: wrap; }
+
+  /* Logo smaller */
+  .logo { font-size: 1.2rem; }
+}
